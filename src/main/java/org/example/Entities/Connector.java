@@ -16,35 +16,43 @@ public class Connector {
     public ConnectorStatus getStatus() { return status; }
     public String getActiveSessionId() { return activeSessionId; }
 
-    public boolean isAvailable() {
+    public synchronized boolean isAvailable() {
         return status == ConnectorStatus.AVAILABLE;
     }
 
-    public void occupy(String sessionId) {
-        if (!isAvailable()) {
-            throw new IllegalStateException("Connector is not available");
+    public synchronized void occupy(String sessionId) {
+        if (sessionId == null || sessionId.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Session ID cannot be empty");
         }
-        this.status = ConnectorStatus.OCCUPIED;
-        this.activeSessionId = sessionId;
+
+        if (status != ConnectorStatus.AVAILABLE) {
+            throw new IllegalStateException(
+                    "Connector is not available");
+        }
+
+        status = ConnectorStatus.OCCUPIED;
+        activeSessionId = sessionId;
     }
 
-    public void release() {
+    public synchronized void release() {
         if (status == ConnectorStatus.OCCUPIED) {
             status = ConnectorStatus.AVAILABLE;
+            activeSessionId = null;
         }
+    }
+
+    public synchronized void takeOutOfService() {
+        if (status == ConnectorStatus.OCCUPIED) {
+            throw new IllegalStateException(
+                    "Cannot take an occupied connector out of service");
+        }
+
+        status = ConnectorStatus.OUT_OF_SERVICE;
         activeSessionId = null;
     }
 
-    public void takeOutOfService() {
-        if (status == ConnectorStatus.OCCUPIED) {
-            throw new IllegalStateException(
-                    "Cannot disable an occupied connector"
-            );
-        }
-        status = ConnectorStatus.OUT_OF_SERVICE;
-    }
-
-    public void restore() {
+    public synchronized void restore() {
         if (status == ConnectorStatus.OUT_OF_SERVICE) {
             status = ConnectorStatus.AVAILABLE;
         }

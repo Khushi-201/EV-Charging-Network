@@ -37,7 +37,7 @@ public class Vehicle {
 
         if (supportedConnectorTypes == null
                 || supportedConnectorTypes.isEmpty()
-                || supportedConnectorTypes.contains(null)) {
+                || supportedConnectorTypes.stream().anyMatch(type -> type == null)) {
             throw new IllegalArgumentException(
                     "At least one valid connector type is required");
         }

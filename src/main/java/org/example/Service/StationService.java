@@ -12,29 +12,71 @@ public class StationService {
     }
 
     public synchronized void registerStation(Station station) {
-        if (store.stations.containsKey(station.getId())) {
-            throw new IllegalArgumentException("Station already exists");
+        if (station == null) {
+            throw new IllegalArgumentException(
+                    "Station cannot be null");
         }
+
+        if (station.getId() == null || station.getId().isBlank()) {
+            throw new IllegalArgumentException(
+                    "Station ID cannot be empty");
+        }
+
+        if (store.stations.containsKey(station.getId())) {
+            throw new IllegalArgumentException(
+                    "Station already exists");
+        }
+
+        if (station.getConnectors() == null
+                || station.getConnectors().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Station must have at least one connector");
+        }
+
         store.stations.put(station.getId(), station);
     }
 
     public Station getStation(String stationId) {
         Station station = store.stations.get(stationId);
+
         if (station == null) {
-            throw new IllegalArgumentException("Station not found");
+            throw new IllegalArgumentException(
+                    "Station not found: " + stationId);
         }
+
         return station;
     }
 
     public synchronized void setConnectorOutOfService(
-            String stationId, String connectorId) {
-        getStation(stationId).getConnector(connectorId)
+            String stationId,
+            String connectorId) {
+
+        getConnectorOrThrow(stationId, connectorId)
                 .takeOutOfService();
     }
 
     public synchronized void restoreConnector(
-            String stationId, String connectorId) {
-        getStation(stationId).getConnector(connectorId).restore();
+            String stationId,
+            String connectorId) {
+
+        getConnectorOrThrow(stationId, connectorId)
+                .restore();
+    }
+
+    private Connector getConnectorOrThrow(
+            String stationId,
+            String connectorId) {
+
+        Station station = getStation(stationId);
+        Connector connector = station.getConnector(connectorId);
+
+        if (connector == null) {
+            throw new IllegalArgumentException(
+                    "Connector " + connectorId
+                            + " not found at station " + stationId);
+        }
+
+        return connector;
     }
 
     public synchronized ConnectorChoice findConnector(
