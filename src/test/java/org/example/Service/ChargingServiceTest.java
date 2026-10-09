@@ -2,6 +2,7 @@ package org.example.Service;
 
 import org.example.Entities.*;
 import org.junit.jupiter.api.Test;
+import java.util.Set;
 
 import java.math.BigDecimal;
 
@@ -28,7 +29,10 @@ class ChargingServiceTest {
         store.drivers.put(driver.getId(), driver);
 
         Vehicle vehicle = new Vehicle(
-                "V1", "D1", "UP-01-EV-1234", ConnectorType.AC
+                "V1",
+                "D1",
+                "UP-01-EV-1234",
+                Set.of(ConnectorType.AC, ConnectorType.DC)
         );
         store.vehicles.put(vehicle.getId(), vehicle);
 

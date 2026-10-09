@@ -50,6 +50,11 @@ public class ChargingService {
                     "Vehicle does not belong to this driver");
         }
 
+        if (!vehicle.supportsConnectorType(requestedType)) {
+            throw new IllegalArgumentException(
+                    "Vehicle does not support the requested connector type");
+        }
+
         boolean alreadyActive = store.sessions.values().stream()
                 .anyMatch(s ->
                         s.getVehicleId().equals(vehicleId)
@@ -79,6 +84,10 @@ public class ChargingService {
 
         Station station = choice.getStation();
         Connector connector = choice.getConnector();
+        if (!vehicle.supportsConnectorType(connector.getType())) {
+            throw new IllegalStateException(
+                    "No available compatible connector for this vehicle");
+        }
         String sessionId = UUID.randomUUID().toString();
 
         ChargingSession session = new ChargingSession(
@@ -93,7 +102,6 @@ public class ChargingService {
                 promoCode
         );
 
-        // Reserve connector and persist session
         connector.occupy(sessionId);
         store.sessions.put(sessionId, session);
         driver.getSessionIds().add(sessionId);
@@ -101,7 +109,6 @@ public class ChargingService {
         return session;
     }
 
-    // End a charging session and calculate the bill
     public synchronized BillingDetails endSession(
             String sessionId,
             BigDecimal energyKwh) {

@@ -7,6 +7,7 @@ import org.example.Entities.*;
 public class Main {
     public static void main(String[] args) {
         InMemoryStore store = new InMemoryStore();
+        DriverService driverService = new DriverService(store);
         StationService stationService = new StationService(store);
         BillingService billingService = new BillingService();
 
@@ -14,12 +15,11 @@ public class Main {
                 new ChargingService(store, stationService, billingService);
 
         Driver driver = new Driver("D1", "Aman", "aman@example.com");
-        store.drivers.put(driver.getId(), driver);
+        driverService.registerDriver(driver);
 
         Vehicle vehicle = new Vehicle(
                 "V1", "D1", "UP-01-EV-1234", ConnectorType.AC);
-        store.vehicles.put(vehicle.getId(), vehicle);
-
+        driverService.registerVehicle(vehicle);
         Station station = new Station(
                 "S1", "City Charging Hub", 28.6139, 77.2090);
         station.addConnector(new Connector("C1", ConnectorType.AC));
