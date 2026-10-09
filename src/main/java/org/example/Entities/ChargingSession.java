@@ -20,6 +20,8 @@ public class ChargingSession {
     private BillingDetails billingDetails;
     private final String promoCode;
 
+    private PromoCode promoSnapshot;
+
     public ChargingSession(
             String id,
             String driverId,
@@ -84,5 +86,13 @@ public class ChargingSession {
         }
         status = SessionStatus.NO_SHOW;
         endTime = LocalDateTime.now();
+    }
+
+    public PromoCode getPromoSnapshot() {
+        return promoSnapshot;
+    }
+
+    public void setPromoSnapshot(PromoCode promoSnapshot) {
+        this.promoSnapshot = promoSnapshot;
     }
 }

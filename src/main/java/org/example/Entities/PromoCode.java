@@ -46,4 +46,14 @@ public class PromoCode {
                 && !time.isBefore(validFrom)
                 && !time.isAfter(validUntil);
     }
+
+    public PromoCode snapshotForSession(){
+        return new PromoCode(
+                this.code,
+                this.discountPercent,
+                this.maxDiscount,
+                this.validFrom,
+                this.validUntil
+        );
+    }
 }

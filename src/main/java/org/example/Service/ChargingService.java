@@ -65,15 +65,23 @@ public class ChargingService {
                     "Vehicle already has an active session");
         }
 
-        if (promoCode != null && !promoCode.isBlank()) {
-            PromoCode promo = store.promoCodes.get(
-                    promoCode.toUpperCase());
+        PromoCode acceptedPromo = null;
 
-            if (promo == null ||
-                    !promo.isValidAt(LocalDateTime.now())) {
+        if (promoCode != null && !promoCode.isBlank()) {
+            String normalizedCode = promoCode.trim().toUpperCase(
+                    java.util.Locale.ROOT
+            );
+
+            acceptedPromo = store.promoCodes.get(normalizedCode);
+
+            if (acceptedPromo == null
+                    || !acceptedPromo.isValidAt(LocalDateTime.now())) {
                 throw new IllegalArgumentException(
                         "Invalid or expired promo code");
             }
+
+            // Store the canonical code used by the promo catalogue.
+            promoCode = acceptedPromo.getCode();
         } else {
             promoCode = null;
         }
@@ -102,6 +110,12 @@ public class ChargingService {
                 promoCode
         );
 
+        session.setPromoSnapshot(
+                acceptedPromo == null
+                        ? null
+                        : acceptedPromo.snapshotForSession()
+        );
+
         connector.occupy(sessionId);
         store.sessions.put(sessionId, session);
         driver.getSessionIds().add(sessionId);
@@ -120,9 +134,7 @@ public class ChargingService {
                     "Energy delivered cannot be negative or null");
         }
 
-        PromoCode promo = session.getPromoCode() == null
-                ? null
-                : store.promoCodes.get(session.getPromoCode());
+        PromoCode promo = session.getPromoSnapshot();
 
         // Important: bill using requested type, not actual connector type.
         // Example: AC requested, DC used as fallback -> AC tariff applies.
