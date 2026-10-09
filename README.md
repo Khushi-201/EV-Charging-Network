@@ -8,8 +8,10 @@ The requirements leave certain behaviors open to interpretation. The following a
 
 ### 1. Driver, Vehicle & Station Management
 
-* Every driver, vehicle, station, connector, and session has a unique identifier.
-* A vehicle belongs to one driver, and only that driver can start a charging session using it.
+* A driver must be registered before a vehicle can be registered to them.
+* Each vehicle belongs to one registered driver.
+* Only the driver associated with a vehicle can start a charging session using it.
+* Driver and vehicle account suspension, deactivation, and reactivation are outside the current scope.
 * Inactive drivers and vehicles cannot initiate sessions.
 * A station must be active to be considered for connector selection.
 * A station's location is represented by latitude and longitude. The driver's current location and acceptable search radius are supplied when requesting a charging session.
@@ -17,7 +19,7 @@ The requirements leave certain behaviors open to interpretation. The following a
 
 ### 2. Connector Selection & Compatibility
 
-* Only connectors that are available and in service are eligible for selection.
+* Only eligible stations and available connectors within the requested search radius are considered.
 * Connectors marked out of service are excluded until explicitly restored.
 * Distance is calculated using the Haversine formula, with the Earth's radius approximated as 6,371 km.
 * Only stations within the requested radius are considered.
@@ -134,18 +136,19 @@ The test suite must pass before submission. Test files alone do not establish co
 2. Wire each strategy and policy interface into its corresponding service and add alternative implementations.
 3. Snapshot accepted promo terms at session start.
 4. Model vehicle connector compatibility and charging capabilities more explicitly.
-5. Introduce a booking model and grace period if no-show fees are required.
-6. Replace in-memory collections with transactional database persistence and atomic connector reservation.
-7. Add structured logging, stronger input validation, and clearer CLI input handling.
-8. Automate builds and tests through continuous integration.
+5. Replace in-memory collections with transactional database persistence and atomic connector reservation.
+6. Add structured logging, stronger input validation, and clearer CLI input handling.
+7. Automate builds and tests through continuous integration.
 
 ## Use of AI
 
-AI was used as a development assistant to explore the domain model, draft service implementations, identify potential extension points, and generate initial test cases.
+AI was used as a development assistant to explore the domain model, draft service implementations, and generate initial test cases.
 
-The suggestions were reviewed and adapted to the project's actual package structure and method signatures. For example, `ConnectorChoice` was moved from a nested class to a separate entity so that connector-selection results could be shared without coupling consumers to the internal structure of `StationService`. The implementation also uses Core Java and a CLI instead of retaining the initial Spring Boot approach, keeping the solution focused on the required domain behavior and the available development time.
+The suggestions were reviewed and adapted to the project's actual package structure and method signatures. 
 
-Generated code was treated as a starting point, not as evidence of correctness. The final implementation should be compiled, tested, and reviewed to confirm that it matches the documented behavior. The submitted code and tests should reflect what was actually verified.
+I prompted to provide basic structural service implementation but the provide code was lacking certain validations so I added them myself, in order to generate relevant exceptions in case input is not provided in expected formats.
+
+Generated code was treated as a starting point, not as evidence of correctness. The final implementation should be compiled, tested, and reviewed to confirm that it matches the documented behavior.
 
 ## Repository
 
